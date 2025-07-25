@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLID 設計原則：互動式學習指南</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --content-bg: #ffffff;
+            --border-color: #e9ecef;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--content-bg);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar .sidebar-header {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar nav li a {
+            display: block;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 0.95em;
+        }
+
+        .sidebar nav li a:hover {
+            background-color: #f0f7ff;
+            color: var(--primary-hover);
+        }
+
+        .sidebar nav li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px 50px;
+            box-sizing: border-box;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- General Content Styles --- */
+        h1, h2, h3, h4 {
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin-top: 1.6em;
+            margin-bottom: 0.8em;
+        }
+        .page > h1 {
+            font-size: 2.8em;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        h3 { font-size: 1.6em; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        h4 { font-size: 1.25em; color: #333; border-bottom: none; margin-top: 1.8em; }
+        p, ul, ol { margin-bottom: 1.2em; font-size: 1.05em; }
+        ul, ol { padding-left: 30px; }
+        li { margin-bottom: 0.6em; }
+        strong { color: var(--primary-hover); }
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background-color: #eef2f7;
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        
+        /* Code Block Styles */
+        pre {
+            background-color: #282c34; color: #abb2bf;
+            padding: 20px; border-radius: 8px;
+            overflow-x: auto; font-size: 0.95em;
+            line-height: 1.6; position: relative;
+        }
+        pre code { background-color: transparent; padding: 0; color: inherit; }
+        .copy-btn {
+            position: absolute; top: 10px; right: 10px;
+            background-color: #4f5b66; color: white;
+            border: none; padding: 5px 10px;
+            border-radius: 5px; cursor: pointer;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        pre:hover .copy-btn { opacity: 1; }
+        .copy-btn:active { background-color: #6a7c8e; }
+        .code-comment { color: #7f848e; font-style: italic; }
+        .code-keyword { color: #c678dd; }
+        .code-string { color: #98c379; }
+        .code-function { color: #61afef; }
+        .code-class { color: #e5c07b; }
+        .code-decorator { color: #d19a66; }
+        .code-preprocessor { color: #c678dd; }
+        .code-type { color: #56b6c2; }
+
+        /* Blockquote and special boxes */
+        blockquote {
+            border-left: 5px solid var(--primary-color); padding: 15px 25px;
+            margin: 25px 0; font-style: italic; color: #555; background-color: #f8f9fa;
+        }
+        .info-box {
+            background-color: #fffbe6; border-left: 5px solid #ffc107;
+            padding: 20px 25px; margin: 25px 0; border-radius: 0 8px 8px 0;
+        }
+        .chapter-summary {
+            background-color: #f0f7ff; border: 1px solid #cce5ff;
+            padding: 25px; border-radius: 8px; margin-top: 40px;
+        }
+        details {
+            border: 1px solid #ddd; border-radius: 8px; margin-top: 2em; background-color: #f9f9f9;
+        }
+        summary {
+            font-weight: bold; font-size: 1.3em; padding: 15px 20px; cursor: pointer;
+            color: var(--primary-hover); background-color: #f0f7ff; border-radius: 7px;
+            outline: none; transition: background-color 0.2s;
+        }
+        summary:hover { background-color: #e0f0ff; }
+        details[open] > summary { border-bottom: 1px solid #ddd; border-radius: 7px 7px 0 0; }
+        .solution-content { padding: 5px 25px 15px 25px; }
+        .solution-content h4 { font-size: 1.4em; border-bottom: 1px solid #eee; padding-bottom: 8px; color: #0056b3; }
+
+        /* Responsive Design */
+        .menu-toggle { display: none; }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .menu-toggle {
+                display: block; position: fixed;
+                top: 15px; left: 15px; z-index: 1001;
+                background: var(--primary-color); color: white;
+                border: none; border-radius: 50%;
+                width: 50px; height: 50px;
+                font-size: 24px; line-height: 50px; text-align: center;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">SOLID 原則指南</div>
+        <nav>
+            <ul>
+                <li><a href="#home" class="nav-link">首頁</a></li>
+                <li><a href="#prologue" class="nav-link">序言</a></li>
+                <li><a href="#ch1" class="nav-link">第一章: 概論</a></li>
+                <li><a href="#ch2" class="nav-link">第二章: SRP</a></li>
+                <li><a href="#ch3" class="nav-link">第三章: OCP</a></li>
+                <li><a href="#ch4" class="nav-link">第四章: LSP</a></li>
+                <li><a href="#ch5" class="nav-link">第五章: ISP</a></li>
+                <li><a href="#ch6" class="nav-link">第六章: DIP</a></li>
+                <li><a href="#ch7" class="nav-link">第七章: Linux 案例</a></li>
+                <li><a href="#ch8" class="nav-link">第八章: 練習題</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Menu Toggle for Mobile -->
+    <button class="menu-toggle" id="menu-toggle">☰</button>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Page: Home -->
+        <div id="home" class="page">
+            <h1>SOLID 設計原則：AI 時代的軟體工藝與架構權衡</h1>
+            <p class="intro-lead" style="font-size: 1.2em; font-style: italic; color: #555; text-align: center; margin: 2em 0;">這不只是一份 SOLID 原則的教學文件。這是一份為處於技術變革浪潮中的現代軟體工程師，量身打造的深度指南。</p>
+            <h2>這份 SOLID 原則指南是為你準備的嗎？</h2>
+            <p><strong>如果你有以下任何一個疑問，那麼這份教材正是你所尋找的：</strong></p>
+            <ul>
+                <li>你是否已經知道 SOLID 五個字母分別代表什麼，但總覺得網路上的範例（如動物、形狀）過於簡化，難以應用到複雜的真實世界專案中？</li>
+                <li>你是否疑惑，在 AI 協作工具能為我們快速生成程式碼的今天，花時間深入理解這些「傳統」設計原則的真正價值何在？</li>
+                <li>你是否是一位 <strong>C 語言開發者</strong>或<strong>系統/韌體工程師</strong>，想知道這些「物件導向」的原則，如何在像 <strong>Linux 核心</strong>這樣非物件導向的底層系統中體現其精神？</li>
+                <li>你是否想超越「規則的遵循者」，深入理解為何像 Linux 核心這樣的頂級專案，在某些關鍵時刻會選擇「不完全遵守」甚至「違背」這些原則，以及其背後關於性能、安全、相容性的深刻權衡？</li>
+                <li>你是否在尋找一個完整的學習路徑，不僅包含理論，更有<strong>真實世界案例分析</strong>以及能<strong>動手實踐的思考與程式練習題</strong>？</li>
+            </ul>
+            <p><strong>如果你的答案是肯定的，那麼這份文件將為你提供獨一無二的價值。</strong></p>
+            <h2>在這份指南中，你將會獲得：</h2>
+            <ul>
+                <li><strong>現代化的視角：</strong> 從「AI 時代軟體工程師的角色轉變」出發，重新定義掌握 SOLID 的重要性。</li>
+                <li><strong>雙語言的深度對比：</strong> 所有原則均提供 <strong>Python</strong>（代表高階應用）與 <strong>C 語言</strong>（代表底層系統）的程式碼範例，讓你看到原則的普適性。</li>
+                <li><strong>來自 Linux 核心的真實智慧：</strong> 我們將深入剖析 <code>file_operations</code>, <code>net_device_ops</code>, <code>inode</code>, <code>syscall</code> 等真實世界的設計，學習頂級工程師如何在理想與現實間做出權衡。</li>
+                <li><strong>從「是什麼」到「為什麼」和「怎麼辦」：</strong> 每一章都包含「掌握的跡象」和「精通之路」的具體指導，幫助你將知識內化為能力。</li>
+                <li><strong>豐富的實踐機會：</strong> 包含專門的「思考與程式練習題」章節，涵蓋應用程式與系統程式設計的綜合挑戰。</li>
+            </ul>
+            <p>這份教材的目標，不僅是讓你「學會」SOLID，更是要幫助你建立起一種<strong>架構師的思維模式</strong>。讓你無論是在引導 AI、進行程式碼審查，還是設計新的系統時，都能手持一份堅實的「思想羅盤」，打造出真正優雅、健壯且經得起時間考驗的軟體。</p>
+        </div>
+        
+        <!-- Page: Prologue -->
+        <div id="prologue" class="page">
+            <h1>序言：在 AI 時代，我們為何更需要 SOLID？</h1>
+            <p>我們正處於一個軟體開發的變革時代。大型語言模型（LLM）驅動的 AI 協作工具，如 GitHub Copilot、ChatGPT，乃至於更強大的未來模型，正以前所未有的效率生成程式碼。過去需要數小時手動編寫的函式、類別甚至整個模組，現在可能在幾秒鐘內就由 AI 為我們草擬完成。</p>
+            <blockquote>這引發了一個在軟體工程師社群中日益重要的提問：<strong>「當 AI 能為我編寫程式碼時，我還需要費心學習和實踐像 SOLID 這樣『傳統』的設計原則嗎？」</strong></blockquote>
+            <p>這個問題的答案是肯定的，但理由或許已經悄然改變。學習 SOLID 的重要性不僅沒有降低，反而以一種更深刻、更具戰略性的方式凸顯出來。要理解這一點，我們需要先回顧 SOLID 的起源，才能看清它在當下的新角色。</p>
+            <h3>源起與演進：從軟體危機到設計圭臬</h3>
+            <p>SOLID 並非橫空出世的理論，而是軟體工程領域數十年經驗的結晶。這些原則的雛形，最早由電腦科學家 <strong>Robert C. Martin</strong>（業界尊稱為「Uncle Bob」）在他 2000 年的論文《設計原則與設計模式》中系統性地提出。他觀察到，隨著時間推移，軟體若缺乏良好的設計，將會變得「僵化、脆弱、難以變動與重用」，陷入所謂的「軟體腐敗」(Software Rot) 困境。</p>
+            <p>這些原則旨在對抗這種腐敗，為物件導向設計（Object-Oriented Design, OOD）提供一套清晰的指導方針。而 <strong>SOLID</strong> 這個朗朗上口的縮寫，則是由 <strong>Michael Feathers</strong> 在 2004 年左右首次提出，將五個核心原則巧妙地組合在一起：</p>
+            <ul>
+                <li><strong>S</strong> - 單一職責原則 (Single Responsibility Principle)</li>
+                <li><strong>O</strong> - 開放封閉原則 (Open-Closed Principle)</li>
+                <li><strong>L</strong> - 里氏替換原則 (Liskov Substitution Principle)</li>
+                <li><strong>I</strong> - 介面隔離原則 (Interface Segregation Principle)</li>
+                <li><strong>D</strong> - 依賴反轉原則 (Dependency Inversion Principle)</li>
+            </ul>
+            <p>自提出以來，SOLID 迅速被全球的軟體開發社群所採納，尤其在敏捷開發 (Agile Development) 和極限編程 (Extreme Programming, XP) 的浪潮中，成為了衡量「優良程式碼」(Clean Code) 的黃金標準。無數的團隊與專案，從大型企業級應用到新創公司的快速迭代產品，都透過實踐 SOLID，驗證了其在提升軟體可維護性、可擴展性與可測試性上的巨大價值。</p>
+            <h3>替代與延伸：設計原則的百家爭鳴</h3>
+            <p>當然，軟體設計的世界並非只有 SOLID。在它的基礎之上或與之並行，也發展出了其他值得關注的概念：</p>
+            <ul>
+                <li><strong>DRY (Don't Repeat Yourself):</strong> 「不要重複你自己」，強調在系統中，任何一項知識都應該有單一、明確、權威的表示。它與 SOLID 的精神高度互補。</li>
+                <li><strong>KISS (Keep It Simple, Stupid):</strong> 「保持簡單，傻瓜」，提倡在設計中應以簡潔為美，避免不必要的複雜性。</li>
+                <li><strong>YAGNI (You Ain't Gonna Need It):</strong> 「你不會需要它」，警告開發者不要過度設計，不要去實作那些「未來可能需要」但當下並無實際需求的功能。</li>
+                <li><strong>CUPID:</strong> 由 Dan North 近年提出的，旨在補充或提供另一種視角，強調程式碼的 <strong>C</strong>omposable (可組合), <strong>P</strong>redictable (可預測), <strong>I</strong>diomatic (符合語言習慣), <strong>D</strong>omain-based (基於領域) 等特性。</li>
+            </ul>
+            <p>儘管有這些不同的原則與理念，SOLID 至今仍然是物件導向設計領域中，最核心、最廣為人知、也最具影響力的一套框架。它為我們討論和評估軟體架構，提供了一套共通的語言。</p>
+            <h3>SOLID 原則角色的演變：從「寫作指南」到「建築藍圖」</h3>
+            <p>在 AI 時代，SOLID 的角色更像是一份<strong>建築藍圖</strong>。AI 是我們極其高效的施工團隊，它能迅速地砌磚、架設鋼筋。但是，如果沒有一份清晰、穩固、具備前瞻性的建築藍圖，這個團隊蓋出來的可能只是一棟搖搖欲墜的違章建築。它或許短期內能用，但無法應對需求的變化（地震）、無法擴建、也難以維修。</p>
+            <p>SOLID 原則，就是我們用來繪製這份藍圖的核心思維框架。它幫助我們：</p>
+            <ol>
+                <li><strong>提出高品質的指令 (Prompt Engineering)：</strong> 你如何向 AI 描述你想要的功能？一個不了解 SOLID 的工程師可能會說：「幫我寫一個處理使用者訂單的類別。」而一個掌握 SOLID 的工程師會說：「幫我設計一個 <code>OrderService</code>，它遵循單一職責原則，僅負責協調訂單流程。將訂單的儲存邏輯抽象為 <code>IOrderRepository</code> 介面，並透過依賴反轉原則注入...」 前者可能得到一團混亂的程式碼；後者則能引導 AI 生成結構清晰、易於測試和擴展的程式碼。</li>
+                <li><strong>扮演品質守門員 (Quality Gatekeeper)：</strong> AI 生成的程式碼並非完美無瑕。它可能為了快速實現功能而選擇了最直接但最缺乏彈性的作法。我們需要具備基於 SOLID 的「品味」和判斷力，去審視 (Review) AI 的產出。這段程式碼是否職責過多？這個繼承關係是否脆弱？這個模組的依賴關係是否過於混亂？沒有 SOLID 這把尺，我們就無法衡量程式碼的優劣，只能被動地接受 AI 的結果。</li>
+                <li><strong>進行高效率的重構 (Refactoring)：</strong> 我們的工作將更多地聚焦於整合與重構。將 AI 產出的多個程式碼片段，或是需要優化的既有程式碼，透過 SOLID 原則進行重構，使其從「能動」的狀態提升到「健壯」的狀態。</li>
+            </ol>
+            <h3>我們應有的態度轉變：從「程式碼工匠」到「軟體建築師」</h3>
+            <p>因此，我們學習和掌握 SOLID 的態度也應該轉變：</p>
+            <ul>
+                <li><strong>從被動遵守到主動規劃：</strong> SOLID 不再只是避免寫出壞程式碼的消極規則，而是我們在專案初期進行架構設計、在開發中期指導 AI、在後期進行品質驗收的主動策略。</li>
+                <li><strong>從關注實作細節到關注結構關係：</strong> 我們需要將更多的精力從「如何實現這個演算法」轉移到「這個類別與另一個類別應該是什麼關係」、「這個模組應該依賴抽象還是具體實現」。這些更高層次的結構性問題，正是 AI 目前難以獨立解決，而 SOLID 原則能夠給予我們清晰指引的地方。</li>
+                <li><strong>將 SOLID 內化為思維模型：</strong> 掌握 SOLID 的終極目標，是讓它成為你思考軟體設計時的直覺。它將是你區分自己是「AI 操作員」還是「軟體工程師」的關鍵能力。</li>
+            </ul>
+            <div class="chapter-summary">
+                <p><strong>總結來說，AI 工具賦予了我們前所未有的生產力，將我們從繁瑣的編碼勞動中解放出來。而 SOLID 原則，正是我們駕馭這股強大力量、確保產出成果具備長期價值與生命力的核心武器。</strong></p>
+                <p>在這份文件中，我們將不僅是學習 SOLID 的定義，更是要探索如何將這些原則應用於現代軟體開發的實踐中，培養出 AI 時代真正需要的「軟體建築師」思維。讓我們一同踏上這段旅程。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 1 -->
+        <div id="ch1" class="page">
+            <h1>第一章：SOLID 設計原則概論</h1>
+            <p>在序言中，我們探討了在 AI 驅動的開發新時代下，軟體架構與設計思維為何愈發重要。現在，讓我們正式走進這套思維框架的核心——SOLID 原則。</p>
+            <p>正如其名，SOLID 是一套能讓我們的軟體變得「堅固」、「穩固」的指導方針。它並非單一規則，而是由五個各自獨立但相輔相成的物件導向設計（OOD）原則的首字母縮寫所組成。掌握它們，就如同掌握了建築師的結構力學，能讓我們設計出不只「能用」，更是「耐用」、「好用」且易於演進的系統。</p>
+            <h2>為何需要 SOLID？軟體腐敗的對抗者</h2>
+            <p>在深入每個原則之前，我們必須先回答一個問題：SOLID 究竟要解決什麼問題？</p>
+            <p>軟體有一個與生俱來的敵人，稱為「軟體腐敗」（Software Rot）。一個設計不良的系統，會隨著時間的推移、需求的變更和人員的迭代，呈現出以下四種症狀：</p>
+            <ol>
+                <li><strong>僵化 (Rigidity):</strong> 系統難以變更。任何微小的改動，都會像連鎖反應一樣，迫使我們修改許多其他地方的程式碼。</li>
+                <li><strong>脆弱 (Fragility):</strong> 系統極易損壞。在一個地方進行修改，卻導致系統中一個看似完全無關的地方出現錯誤。</li>
+                <li><strong>難以變動/固定 (Immobility):</strong> 程式碼難以重用。想將系統中的某個模組抽出來，用到另一個新系統中，卻發現這個模組和原系統的耦合過於緊密，根本無法分離。</li>
+                <li><strong>黏滯 (Viscosity):</strong> 開發人員寧可選擇破壞原有設計（走捷徑、hack），也不願遵循正確的方式來進行修改，因為「做正確的事」太困難了。</li>
+            </ol>
+            <p>SOLID 的五大原則，正是對抗上述問題的組合拳。它們共同的目標，就是建立<strong>高內聚、低耦合</strong>的系統，讓軟體在面對變化時，能夠展現出色的<strong>可維護性、可擴展性、可重用性與可測試性</strong>。</p>
+            <h2>五大原則鳥瞰</h2>
+            <p>讓我們先快速瀏覽這五個原則的核心思想，建立一個初步的印象。在後續的章節中，我們將會對每一個原則進行詳細的剖析。</p>
+            <dl style="padding-left: 10px;">
+                <dt style="font-weight: bold; font-size: 1.1em; color: var(--primary-hover); margin-top: 1em;">S - 單一職責原則 (Single Responsibility Principle, SRP)</dt>
+                <dd style="margin-left: 20px; padding-left: 15px; border-left: 3px solid var(--border-color);"><strong>核心思想：</strong> 一個類別（或模組）應該只有一個引起它變更的原因。<br><strong>白話文：</strong> 做好一件事，並且把它做好。不要讓一個類別承擔過多的職責。</dd>
+                <dt style="font-weight: bold; font-size: 1.1em; color: var(--primary-hover); margin-top: 1em;">O - 開放封閉原則 (Open-Closed Principle, OCP)</dt>
+                <dd style="margin-left: 20px; padding-left: 15px; border-left: 3px solid var(--border-color);"><strong>核心思想：</strong> 軟體實體（類別、模組、函式等）應該對擴展開放，但對修改封閉。<br><strong>白話文：</strong> 當需要增加新功能時，我們應該是去「增加」新的程式碼，而不是「修改」已經存在的舊程式碼。</dd>
+                <dt style="font-weight: bold; font-size: 1.1em; color: var(--primary-hover); margin-top: 1em;">L - 里氏替換原則 (Liskov Substitution Principle, LSP)</dt>
+                <dd style="margin-left: 20px; padding-left: 15px; border-left: 3px solid var(--border-color);"><strong>核心思想：</strong> 子類別的物件必須能夠替換掉其父類別的物件，而不會影響程式的正確性。<br><strong>白話文：</strong> 使用父類別的地方，必然可以用子類別來無縫接軌，程式的行為必須符合預期。這是確保繼承關係合理性的基石。</dd>
+                <dt style="font-weight: bold; font-size: 1.1em; color: var(--primary-hover); margin-top: 1em;">I - 介面隔離原則 (Interface Segregation Principle, ISP)</dt>
+                <dd style="margin-left: 20px; padding-left: 15px; border-left: 3px solid var(--border-color);"><strong>核心思想：</strong> 客戶端不應該被迫依賴它用不到的介面。<br><strong>白話文：</strong> 應該使用多個小而精的專門介面，而不是一個大而全的臃腫介面。</dd>
+                <dt style="font-weight: bold; font-size: 1.1em; color: var(--primary-hover); margin-top: 1em;">D - 依賴反轉原則 (Dependency Inversion Principle, DIP)</dt>
+                <dd style="margin-left: 20px; padding-left: 15px; border-left: 3px solid var(--border-color);"><strong>核心思想：</strong> 高階模組不應該依賴於低階模組，兩者都應該依賴於抽象。抽象不應該依賴於細節，細節應該依賴於抽象。<br><strong>白話文：</strong> 我們做事要依賴「藍圖」（抽象/介面），而不是依賴「某個特定的施工隊」（具體實現）。這是實現「可插拔」系統的關鍵。</dd>
+            </dl>
+            <h2>「原則」而非「規則」：跨越語言與領域的普適性</h2>
+            <p>這裡要特別強調您提到的觀點：SOLID 的威力遠不止於傳統的物件導向語言。雖然它們誕生於 OOD 的背景，但其背後的思想是普適的。我們應將其視為「原則」（Principles），而非僵化的「規則」（Rules）。</p>
+            <ul>
+                <li>在一個用 <strong>Python</strong> 開發的高階 Web 應用中，我們可以利用其物件導向特性，明確地定義類別、抽象基底類別 (ABC) 和依賴注入容器，來嚴格實踐 SOLID。</li>
+                <li>而在一個用 <strong>C 語言</strong>開發的底層系統，如 <strong>Linux 核心</strong>中，雖然沒有 <code>class</code> 或 <code>interface</code> 關鍵字，但 SOLID 的精神依然閃耀：
+                    <ul>
+                        <li>核心的<code>struct file_operations</code> 結構體，定義了一系列函式指標 (open, read, write...)，這就是一種「介面」，任何檔案系統的驅動都必須「實作」這個介面。這完美體現了<strong>開放封閉原則</strong>和<strong>依賴反轉原則</strong>——核心虛擬檔案系統 (VFS) 依賴於這個抽象的 <code>struct</code>，而不是某個具體的檔案系統（如 ext4 或 btrfs）。</li>
+                        <li>核心中的每一個 <code>.c</code> 檔案或子模組，通常都聚焦於一個明確的職責（如：某個特定的硬體驅動、網路協定處理），這就是<strong>單一職責原則</strong>的體現。</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>這個例子告訴我們，SOLID 的本質是關於<strong>如何管理依賴關係、如何劃分職責、如何定義抽象契約</strong>。無論你使用什麼語言或在哪個領域開發，只要你的系統需要應對複雜性和變化，這些原則就能為你提供極具價值的指導。</p>
+            <h2>如何衡量與實踐：從「知道」到「做到」</h2>
+            <p>理論知識是基礎，但真正的挑戰在於將 SOLID 原則內化為直覺，應用在日常的開發工作中。那麼，你該如何判斷自己是否掌握了這些原則？又該如何刻意練習，讓自己真正精通呢？</p>
+            <h3>1. 如何判斷自己是否成功掌握？</h3>
+            <p>掌握 SOLID 不是一場考試，沒有標準答案，而是一種思維模式的轉變。你可以透過以下幾個「跡象」來判斷：</p>
+            <ul>
+                <li><strong>思考的起點改變了：</strong> 當接到一個新需求時，你的第一個念頭不再是「我該如何快速寫出這個功能？」，而是「我該如何設計類別和模組的關係，才能讓這個新功能優雅地融入系統，並且不影響未來擴展？」</li>
+                <li><strong>你聞得出「程式碼壞味道」：</strong> 當你看到一個擁有數千行、做了十幾件事的類別時，會本能地感覺到「不對勁」（違反 SRP）；當你看到一長串 <code>if/else</code> 或 <code>switch</code> 在檢查物件類型時，會立刻警覺到這可能違反了 OCP 或 LSP。</li>
+                <li><strong>你的提問和討論更有深度：</strong> 在 Code Review 或團隊討論中，你提出的不再只是「這裡有個 bug」，而是「這個高階服務直接依賴了資料庫的具體實作，我們是否應該引入一個 Repository 介面來反轉這個依賴關係？」（DIP）。你的詞彙中自然而然地包含了「職責」、「抽象」、「耦合」等概念。</li>
+                <li><strong>修改程式碼的信心增加了：</strong> 當你需要修改或增加功能時，你不再感到恐懼或焦慮，因為你知道系統的良好設計為你提供了安全網。變更被限制在局部範圍，測試也更容易進行。</li>
+                <li><strong>你引導 AI 的方式不同了：</strong> 你給予 AI 的指令不再是模糊的任務，而是清晰的設計規格。你會要求它「實作某個介面」、「將某個職責分離到新的類別」，將 AI 作為實現你設計藍圖的助手，而非漫無目的的程式碼生成器。</li>
+            </ul>
+            <h3>2. 該如何讓自己掌握這些原則？</h3>
+            <p>精通 SOLID 是一段旅程，無法一蹴可幾。以下是刻意練習的建議路徑：</p>
+            <ol>
+                <li><strong>第一步：學習與理解 (Learn & Understand)</strong>
+                    <ul>
+                        <li><strong>深度閱讀：</strong> 不僅是閱讀本文件，更要去讀像 Robert C. Martin 的《Clean Code》、《Clean Architecture》等經典著作，去理解原則背後的「為什麼」。</li>
+                        <li><strong>觀摩範例：</strong> 在 GitHub 上尋找遵循良好設計的開源專案，觀察它們是如何組織程式碼、劃分模組和定義介面的。</li>
+                    </ul>
+                </li>
+                <li><strong>第二步：練習與實踐 (Practice & Apply)</strong>
+                    <ul>
+                        <li><strong>重構舊程式碼 (Refactoring):</strong> 這是最有效的練習方式。找一段你過去寫的、覺得不滿意的程式碼，嘗試用 SOLID 原則去重構它。這個過程會讓你深刻體會到原則帶來的改變。</li>
+                        <li><strong>刻意應用於新專案：</strong> 在下一個個人專案或一個風險較小的功能開發中，有意識地在動手編碼前，先思考如何應用 SOLID 進行設計。</li>
+                    </ul>
+                </li>
+                <li><strong>第三步：反思與回饋 (Reflect & Get Feedback)</strong>
+                     <ul>
+                        <li><strong>自我提問：</strong> 完成一段程式碼後，問自己：「它符合單一職責嗎？」「如果需求變了，我需要修改這裡嗎？」「它的依賴關係健康嗎？」</li>
+                        <li><strong>參與 Code Review：</strong> 主動尋求同事的回饋，特別是資深工程師的意見。同時，也嘗試用 SOLID の視角去審視他人的程式碼，學習他人優點，思考改進方案。</li>
+                    </ul>
+                </li>
+                <li><strong>第四步：教學相長 (Teach to Solidify)</strong>
+                    <ul>
+                        <li><strong>嘗試解釋給別人聽：</strong> 將你對某個原則的理解，試著向團隊成員、朋友甚至是一隻想像中的小黃鴨解釋清楚。教學是檢驗和鞏固知識的最佳方式。</li>
+                    </ul>
+                </li>
+            </ol>
+            <div class="chapter-summary">
+                <p><strong>本章小結：</strong>在本章中，我們建立了對 SOLID 的初步認識。我們理解到，這五個原則是為了對抗軟體腐敗，以打造高內聚、低耦合的健壯系統為目標。我們快速瀏覽了每個原則的核心思想，意識到它們是超越特定語言、具有普適性的設計智慧，並探討了衡量與精通這些原則的具體路徑。</p>
+                <p>接下來，我們將戴上顯微鏡，從第二章開始，逐一深入探索每個原則的細節、範例以及在實戰中應用的技巧。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 2 -->
+        <div id="ch2" class="page">
+            <h1>第二章：單一職責原則 (SRP) — 專注的力量</h1>
+            <p>單一職責原則 (Single Responsibility Principle, SRP) 是 SOLID 中最基礎、也最常被誤解的一個。它看似簡單，實則深刻地影響著軟體設計的每一個角落。掌握它，是踏出「寫出能動的程式」並邁向「建構健壯的系統」的第一步。本章將帶您徹底理解 SRP 的精髓，並學會如何在不同層次的開發中應用它。</p>
+            <h2>1. 定義與核心思想</h2>
+            <p>Robert C. Martin 對 SRP 的經典定義是：</p>
+            <blockquote>"A class should have one, and only one, reason to change."<br>(一個類別應該只有一個使其變更的原因。)</blockquote>
+            <p>許多人第一次看到這個定義時都會感到「似懂非懂」。什麼是「一個原因」？這是一個相當抽象的概念。</p>
+            <p>為了讓它更具體，Uncle Bob 後來補充了一個更精確的說法：</p>
+            <blockquote>"Gather together the things that change for the same reasons. Separate those things that change for different reasons."<br>(將因為相同原因而變更的東西聚合在一起。將因為不同原因而變更的東西分開。)</blockquote>
+            <p>這裡的「原因」，最實際的理解方式是<strong>「一群關心這件事的人或角色 (Actor)」</strong>。一個軟體系統會有多個角色關心它：</p>
+            <ul>
+                <li><strong>財務長</strong> 關心營收報表的計算規則。</li>
+                <li><strong>資料庫管理員 (DBA)</strong> 關心資料庫的結構和效能。</li>
+                <li><strong>法務長</strong> 關心隱私政策和資料保存期限。</li>
+            </ul>
+            <p>如果一個類別的程式碼，同時被來自<strong>財務長</strong>的需求和來自<strong>DBA</strong>的需求所驅動修改，那麼這個類別就有了<strong>兩個</strong>變更的原因。它違反了 SRP。</p>
+            <p><strong>SRP 的核心思想就是：一個類別（或模組、函式）應該只對一個「角色」負責。</strong></p>
+            <h2>2. 為何重要？違反 SRP 的代價</h2>
+            <p>當我們違反 SRP，讓一個類別像一把功能過多的瑞士刀時，會付出沉重的代價：</p>
+            <ol>
+                <li><strong>高耦合 (High Coupling):</strong> 不相關的職責被緊緊綁在一起。修改報表格式的程式碼，卻可能影響到資料庫連線的邏輯。就像想修理瑞士刀上的小剪刀，卻必須把整把刀送修一樣。</li>
+                <li><strong>脆弱性 (Fragility):</strong> 這是一個必然的結果。當財務長要求修改報表計算規則時，你修改了程式碼，卻意外地破壞了資料庫的存取邏輯，導致系統在一個意想不到的地方崩潰。</li>
+                <li><strong>測試困難 (Difficult to Test):</strong> 如果報表生成、資料庫存取、日誌記錄全都在一個類別裡，為了測試小小的報表格式，你可能需要模擬一個完整的資料庫連線和檔案系統，測試變得異常複雜和緩慢。</li>
+                <li><strong>合併衝突 (Merge Conflicts):</strong> 在團隊協作中，這是一個非常實際的痛點。開發者 A 為了財務長的需求修改了報表邏輯，同時開發者 B 為了 DBA 的需求優化了資料庫查詢，他們兩人將會修改同一個檔案，引發痛苦的程式碼合併衝突。</li>
+            </ol>
+            <h2>3. 程式碼實戰：從違規到遵循</h2>
+            <p>讓我們透過兩個不同層級的例子，一個使用 Python，一個使用 C，來感受 SRP 的威力。</p>
+            <h3>範例一 (Python): 高階應用程式的職責分離</h3>
+            <p><strong>反面範例 (Bad Practice): 一個無所不包的 <code>Report</code> 類別</strong></p>
+            <pre><code><span class="code-keyword">import</span> json
+<span class="code-keyword">import</span> sqlite3
+
+<span class="code-keyword">class</span> <span class="code-class">Report</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, title, content):
+        <span class="code-keyword">self</span>.title = title
+        <span class="code-keyword">self</span>.content = content
+
+    <span class="code-keyword">def</span> <span class="code-function">get_data_from_db</span>(<span class="code-keyword">self</span>, query):
+        <span class="code-comment">"""職責一：資料庫存取"""</span>
+        <span class="code-function">print</span>(<span class="code-string">f"從資料庫獲取資料: {query}"</span>)
+        <span class="code-comment"># conn = sqlite3.connect('my_database.db')</span>
+        <span class="code-comment"># ... 執行查詢 ...</span>
+        <span class="code-keyword">self</span>.content = <span class="code-string">"從資料庫來的資料"</span> <span class="code-comment"># 假設的資料</span>
+
+    <span class="code-keyword">def</span> <span class="code-function">format_as_json</span>(<span class="code-keyword">self</span>):
+        <span class="code-comment">"""職責二：格式化"""</span>
+        <span class="code-function">print</span>(<span class="code-string">"將報告內容格式化為 JSON"</span>)
+        report_dict = {
+            <span class="code-string">'title'</span>: <span class="code-keyword">self</span>.title,
+            <span class="code-string">'content'</span>: <span class="code-keyword">self</span>.content
+        }
+        <span class="code-keyword">return</span> json.<span class="code-function">dumps</span>(report_dict)
+
+<span class="code-comment"># 使用方式</span>
+report = <span class="code-function">Report</span>(<span class="code-string">"月度銷售報告"</span>, <span class="code-string">""</span>)
+report.<span class="code-function">get_data_from_db</span>(<span class="code-string">"SELECT * FROM sales"</span>)
+json_report = report.<span class="code-function">format_as_json</span>()
+<span class="code-function">print</span>(json_report)
+</code></pre>
+            <p><strong>正面範例 (Good Practice): 將職責分離</strong></p>
+            <pre><code><span class="code-keyword">import</span> json
+
+<span class="code-comment"># 職責一：專注於報告的內容與結構</span>
+<span class="code-keyword">class</span> <span class="code-class">Report</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, title, content):
+        <span class="code-keyword">self</span>.title = title
+        <span class="code-keyword">self</span>.content = content
+
+<span class="code-comment"># 職責二：專注於報告的儲存與讀取</span>
+<span class="code-keyword">class</span> <span class="code-class">ReportRepository</span>:
+    <span class="code-keyword">def</span> <span class="code-function">get_report_data</span>(<span class="code-keyword">self</span>, query):
+        <span class="code-function">print</span>(<span class="code-string">f"從資料庫獲取資料: {query}"</span>)
+        <span class="code-comment"># ... 實際的資料庫操作 ...</span>
+        <span class="code-keyword">return</span> <span class="code-string">"從資料庫來的資料"</span>
+
+<span class="code-comment"># 職責三：專注於報告的呈現</span>
+<span class="code-keyword">class</span> <span class="code-class">JsonReportPresenter</span>:
+    <span class="code-keyword">def</span> <span class="code-function">format</span>(<span class="code-keyword">self</span>, report):
+        <span class="code-function">print</span>(<span class="code-string">"將報告內容格式化為 JSON"</span>)
+        report_dict = {
+            <span class="code-string">'title'</span>: report.title,
+            <span class="code-string">'content'</span>: report.content
+        }
+        <span class="code-keyword">return</span> json.<span class="code-function">dumps</span>(report_dict)
+
+<span class="code-comment"># 使用方式 (由一個更高層的協調者來組合)</span>
+repository = <span class="code-function">ReportRepository</span>()
+presenter = <span class="code-function">JsonReportPresenter</span>()
+
+report_content = repository.<span class="code-function">get_report_data</span>(<span class="code-string">"SELECT * FROM sales"</span>)
+report = <span class="code-function">Report</span>(<span class="code-string">"月度銷售報告"</span>, report_content)
+json_presentation = presenter.<span class="code-function">format</span>(report)
+<span class="code-function">print</span>(json_presentation)
+</code></pre>
+            <h3>範例二 (C): 底層系統的模組職責</h3>
+            <p><strong>反面範例 (Bad Practice): 一個混雜的驅動程式檔案 <code>task_manager.c</code></strong></p>
+            <pre><code><span class="code-comment">// task_manager.c (反面範例)</span>
+<span class="code-preprocessor">#include &lt;stdio.h&gt;</span>
+<span class="code-preprocessor">#include "uart.h"</span>      <span class="code-comment">// 硬體驅動</span>
+<span class="code-preprocessor">#include "flash.h"</span>     <span class="code-comment">// 硬體驅動</span>
+<span class="code-preprocessor">#include "task_logic.h"</span><span class="code-comment">// 業務邏輯</span>
+
+<span class="code-keyword">void</span> <span class="code-function">handle_all_tasks</span>() {
+    <span class="code-comment">// 職責一: 讀取硬體</span>
+    <span class="code-keyword">char</span> command[256];
+    <span class="code-function">uart_read_line</span>(command, <span class="code-function">sizeof</span>(command));
+
+    <span class="code-comment">// 職責二: 解析與執行業務邏輯</span>
+    <span class="code-keyword">int</span> task_id = <span class="code-function">parse_command</span>(command);
+    <span class="code-function">execute_task</span>(task_id);
+
+    <span class="code-comment">// 職責三: 寫入硬體</span>
+    <span class="code-keyword">char</span> log_message[512];
+    <span class="code-function">sprintf</span>(log_message, <span class="code-string">"Task %d executed."</span>, task_id);
+    <span class="code-function">flash_write_log</span>(log_message);
+}
+</code></pre>
+            <p><strong>正面範例 (Good Practice): 職責分離到不同模組</strong></p>
+            <p><code>main.c</code> <strong>(作為協調者)</strong></p>
+            <pre><code><span class="code-comment">// main.c</span>
+<span class="code-preprocessor">#include "input_handler.h"</span>
+<span class="code-preprocessor">#include "app_logic.h"</span>
+<span class="code-preprocessor">#include "logging.h"</span>
+
+<span class="code-keyword">int</span> <span class="code-function">main</span>() {
+    <span class="code-keyword">while</span>(1) {
+        <span class="code-keyword">char</span> command[256];
+        <span class="code-function">get_next_command</span>(command, <span class="code-function">sizeof</span>(command)); <span class="code-comment">// 從輸入模組拿命令</span>
+        <span class="code-function">process_command</span>(command);              <span class="code-comment">// 交給邏輯模組處理</span>
+        <span class="code-function">log_task_execution</span>(<span class="code-function">get_last_task_id</span>());   <span class="code-comment">// 讓日誌模組記錄</span>
+    }
+    <span class="code-keyword">return</span> 0;
+}
+</code></pre>
+            <div class="chapter-summary">
+                <p><strong>小結與連結：</strong>單一職責原則是 SOLID 中最重要也最基礎的原則。它強迫我們在動手寫程式碼之前，先進行思考和分解，將複雜的問題拆解成一個個職責單一、易於管理的小單元。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 3 -->
+        <div id="ch3" class="page">
+            <h1>第三章：開放封閉原則 (OCP) — 擁抱變化的藝術</h1>
+            <p>在軟體開發的生命週期中，唯一不變的就是「變化」。需求會增加，業務規則會調整，技術會演進。開放封閉原則（Open-Closed Principle, OCP）提供了一種強而有力的設計哲學，來應對這個永恆的挑戰。</p>
+            <h2>1. 定義與核心思想</h2>
+            <blockquote>"Software entities (classes, modules, functions, etc.) should be open for extension, but closed for modification."</blockquote>
+            <p>要解開這個矛盾，關鍵在於理解 OCP 的核心武器——<strong>抽象 (Abstraction)</strong>。</p>
+            <h3>範例一 (Python): 使用策略模式 (Strategy Pattern) 實現 OCP</h3>
+            <p><strong>正面範例 (Good Practice): 抽象出「策略」</strong></p>
+            <pre><code><span class="code-keyword">from</span> abc <span class="code-keyword">import</span> ABC, abstractmethod
+<span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass
+
+<span class="code-comment">@dataclass</span>
+<span class="code-keyword">class</span> <span class="code-class">Order</span>:
+    weight: <span class="code-type">float</span>
+
+<span class="code-comment"># 1. 定義抽象契約 (對修改封閉的核心)</span>
+<span class="code-keyword">class</span> <span class="code-class">ShippingStrategy</span>(ABC):
+    <span class="code-comment">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-function">calculate</span>(<span class="code-keyword">self</span>, order: <span class="code-class">Order</span>) -> <span class="code-type">float</span>:
+        <span class="code-keyword">pass</span>
+
+<span class="code-comment"># 2. 創建具體的策略實現 (對擴展開放的部分)</span>
+<span class="code-keyword">class</span> <span class="code-class">StandardShipping</span>(<span class="code-class">ShippingStrategy</span>):
+    <span class="code-keyword">def</span> <span class="code-function">calculate</span>(<span class="code-keyword">self</span>, order: <span class="code-class">Order</span>) -> <span class="code-type">float</span>:
+        <span class="code-keyword">return</span> order.weight * 10
+
+<span class="code-comment"># 核心計算邏輯，它依賴抽象，而非具體實現</span>
+<span class="code-keyword">def</span> <span class="code-function">calculate_shipping_cost</span>(order: <span class="code-class">Order</span>, strategy: <span class="code-class">ShippingStrategy</span>) -> <span class="code-type">float</span>:
+    <span class="code-keyword">return</span> strategy.<span class="code-function">calculate</span>(order)
+
+<span class="code-comment"># --- 當新需求來臨時 ---</span>
+<span class="code-comment"># 3. 我們只需要新增程式碼，完全不用碰上面的任何程式碼</span>
+<span class="code-keyword">class</span> <span class="code-class">PriorityShipping</span>(<span class="code-class">ShippingStrategy</span>):
+    <span class="code-keyword">def</span> <span class="code-function">calculate</span>(<span class="code-keyword">self</span>, order: <span class="code-class">Order</span>) -> <span class="code-type">float</span>:
+        <span class="code-keyword">return</span> order.weight * 35
+</code></pre>
+            <div class="info-box">
+                <p><strong>提醒：現實世界中的取捨與權衡</strong></p>
+                <p>掌握原則的<strong>精神</strong>（Intent）比死守其<strong>字面</strong>實現更重要。原則是<strong>「羅盤」</strong>，為你指明方向；它不是<strong>「GPS」</strong>，不會給你唯一固定的路線。</p>
+            </div>
+            <div class="chapter-summary">
+                <p><strong>小結與連結：</strong>開放封閉原則是物件導向設計的核心。它教會我們如何透過<strong>抽象</strong>來駕馭變化，建立出既穩定又靈活的系統。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 4 -->
+        <div id="ch4" class="page">
+            <h1>第四章：里氏替換原則 (LSP) — 繼承的契約</h1>
+            <p>里氏替換原則 (Liskov Substitution Principle, LSP) 聽起來像是一個複雜的數學定理，但它的核心思想卻非常直觀，旨在回答一個根本問題：<strong>什麼樣的繼承才是「好」的繼承？</strong></p>
+            <blockquote><strong>「在任何使用父類別物件的地方，都應該可以無縫地替換成其子類別的物件，而程式的行為不會產生任何錯誤或異常。」</strong></blockquote>
+            <h3>範例一 (Python): 長方形與正方形的陷阱</h3>
+            <p><strong>反面範例 (Bad Practice): 違反父類別行為的子類別</strong></p>
+            <pre><code><span class="code-keyword">class</span> <span class="code-class">Rectangle</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, width: <span class="code-type">float</span>, height: <span class="code-type">float</span>):
+        <span class="code-keyword">self</span>._width = width
+        <span class="code-keyword">self</span>._height = height
+    <span class="code-comment">#...</span>
+<span class="code-keyword">class</span> <span class="code-class">Square</span>(<span class="code-class">Rectangle</span>):
+    <span class="code-comment">#...</span>
+    <span class="code-keyword">def</span> <span class="code-function">set_width</span>(<span class="code-keyword">self</span>, width: <span class="code-type">float</span>):
+        <span class="code-keyword">self</span>._width = width
+        <span class="code-keyword">self</span>._height = width
+<span class="code-comment">#...</span>
+sq = <span class="code-function">Square</span>(5)
+<span class="code-function">use_rectangle</span>(sq) <span class="code-comment"># 程式崩潰！ AssertionError</span>
+</code></pre>
+            <h3>範例二 (C): Linux 核心 <code>file_operations</code> 的契約精神</h3>
+            <p><strong>反面範例：違反契約的驅動</strong></p>
+            <pre><code><span class="code-keyword">int</span> <span class="code-function">bad_driver_read</span>(<span class="code-keyword">char</span>* buf, <span class="code-keyword">int</span> size) {
+    <span class="code-comment">// 假設發生了硬體錯誤</span>
+    <span class="code-comment">// BUG: 違反了契約，失敗時回傳了 0 而不是負數</span>
+    <span class="code-keyword">return</span> 0;
+}
+</code></pre>
+            <div class="chapter-summary">
+                <p><strong>小結與連結：</strong>里氏替換原則是確保物件導向繼承體系穩固的紀律委員。它強迫我們建立在行為上一致的繼承層次，從而讓多態和代碼抽象能夠安全可靠地運作。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 5 -->
+        <div id="ch5" class="page">
+            <h1>第五章：介面隔離原則 (ISP) — 精準的契約藝術</h1>
+            <p>介面隔離原則 (Interface Segregation Principle, ISP) 專注於軟體組件之間的溝通「契約」——也就是介面。它旨在解決因介面設計過於「臃腫」或「肥胖」而導致的種種問題。</p>
+            <blockquote>"Clients should not be forced to depend on interfaces they do not use."</blockquote>
+            <h3>範例一 (Python): 智慧辦公設備的介面設計</h3>
+            <p><strong>正面範例 (Good Practice): 拆分成多個角色介面</strong></p>
+            <pre><code><span class="code-keyword">from</span> abc <span class="code-keyword">import</span> ABC, abstractmethod
+
+<span class="code-keyword">class</span> <span class="code-class">IPrinter</span>(ABC):
+    <span class="code-decorator">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-function">print_document</span>(<span class="code-keyword">self</span>, doc): <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">IScanner</span>(ABC):
+    <span class="code-decorator">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-function">scan_document</span>(<span class="code-keyword">self</span>, doc): <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">OldPrinter</span>(<span class="code-class">IPrinter</span>): <span class="code-comment"># 只依賴自己需要的介面</span>
+    <span class="code-keyword">def</span> <span class="code-function">print_document</span>(<span class="code-keyword">self</span>, doc):
+        <span class="code-function">print</span>(<span class="code-string">f"正在列印: {doc}"</span>)
+
+<span class="code-keyword">class</span> <span class="code-class">Photocopier</span>(<span class="code-class">IPrinter</span>, <span class="code-class">IScanner</span>): <span class="code-comment"># 實現多個小介面</span>
+    <span class="code-keyword">def</span> <span class="code-function">print_document</span>(<span class="code-keyword">self</span>, doc): <span class="code-function">print</span>(<span class="code-string">f"影印機正在列印: {doc}"</span>)
+    <span class="code-keyword">def</span> <span class="code-function">scan_document</span>(<span class="code-keyword">self</span>, doc): <span class="code-function">print</span>(<span class="code-string">f"影印機正在掃描: {doc}"</span>)
+</code></pre>
+            <h3>範例二 (C): Linux 核心 <code>file_operations</code> — 違反 ISP 的智慧？</h3>
+            <h4>結論：</h4>
+            <p><code>file_operations</code> 的設計是工程智慧的典範。它告訴我們，<strong>理解原則背後的權衡，比死守字面定義更重要</strong>。它用對 ISP 的一次「明智的違反」，換取了整個 VFS 架構的簡潔與高效。</p>
+            <div class="chapter-summary">
+                <p><strong>小結與連結：</strong>介面隔離原則是保持系統低耦合、高內聚的重要武器。它讓我們從「大而全」的設計思維，轉向「小而精」的契約精神。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 6 -->
+        <div id="ch6" class="page">
+            <h1>第六章：依賴反轉原則 (DIP) — 解耦合的終極之道</h1>
+            <p>依賴反轉原則 (Dependency Inversion Principle, DIP) 是 SOLID 原則的「黏著劑」。它將前面 SRP、OCP、LSP、ISP 所創造出的高品質模組與介面，以一種極度靈活的方式組織在一起。</p>
+            <blockquote>1. High-level modules should not depend on low-level modules. Both should depend on abstractions.<br>2. Abstractions should not depend on details. Details should depend on abstractions.</blockquote>
+            <h3>範例一 (Python): 可插拔的通知服務</h3>
+            <p><strong>正面範例 (Good Practice): 依賴抽象，並由外部注入</strong></p>
+            <pre><code><span class="code-keyword">from</span> abc <span class="code-keyword">import</span> ABC, abstractmethod
+
+<span class="code-keyword">class</span> <span class="code-class">IMessageSender</span>(ABC): <span class="code-comment"># 1. 定義抽象</span>
+    <span class="code-decorator">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-function">send</span>(<span class="code-keyword">self</span>, message: <span class="code-type">str</span>): <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">EmailSender</span>(<span class="code-class">IMessageSender</span>): <span class="code-comment"># 2. 低階模組實現抽象</span>
+    <span class="code-keyword">def</span> <span class="code-function">send</span>(<span class="code-keyword">self</span>, message: <span class="code-type">str</span>): <span class="code-function">print</span>(<span class="code-string">f"透過 Email 發送: {message}"</span>)
+
+<span class="code-keyword">class</span> <span class="code-class">OrderService</span>: <span class="code-comment"># 3. 高階模組依賴抽象</span>
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, sender: <span class="code-class">IMessageSender</span>): <span class="code-comment"># 透過 DI 注入</span>
+        <span class="code-keyword">self</span>.sender = sender
+    <span class="code-keyword">def</span> <span class="code-function">place_order</span>(<span class="code-keyword">self</span>):
+        <span class="code-keyword">self</span>.sender.<span class="code-function">send</span>(<span class="code-string">f"您的訂單已成功下單！"</span>)
+
+<span class="code-comment"># 4. 在系統的「組裝區」決定依賴關係</span>
+order_service_email = <span class="code-function">OrderService</span>(<span class="code-function">EmailSender</span>())
+</code></pre>
+            <h3>範例二 (C): Linux 網路驅動的依賴反轉</h3>
+            <pre><code><span class="code-comment">// --- 高階模組 (e.g. core/net.c) ---</span>
+<span class="code-comment">// 只依賴抽象，不知道任何具體驅動的存在</span>
+<span class="code-keyword">int</span> <span class="code-function">dev_queue_xmit</span>(<span class="code-keyword">struct</span> <span class="code-type">sk_buff</span> *skb, <span class="code-keyword">struct</span> <span class="code-type">net_device</span> *dev) {
+    <span class="code-keyword">return</span> dev->netdev_ops-><span class="code-function">ndo_start_xmit</span>(skb, dev);
+}
+</code></pre>
+            <div class="chapter-summary">
+                <p><strong>小結與連結：SOLID 的終點與起點</strong></p>
+                <p>DIP 是 SOLID 原則的巔峰，它將所有其他原則的價值發揮到極致。我們可以這樣看：</p>
+                <ol>
+                    <li>我們遵循 <strong>SRP</strong>，將系統拆分成職責單一的小模組。</li>
+                    <li>我們遵循 <strong>ISP</strong>，為這些模組定義出小而精的抽象介面。</li>
+                    <li>我們遵循 <strong>DIP</strong>，讓高階模組依賴這些抽象介面。</li>
+                    <li>我們確保所有實現介面的模組都遵循 <strong>LSP</strong>。</li>
+                    <li>最終，我們得到了一個完全符合 <strong>OCP</strong> 的系統。</li>
+                </ol>
+                <p>SOLID 不是五個孤立的規則，而是一個相輔相成、密不可分的設計哲學。</p>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 7 -->
+        <div id="ch7" class="page">
+            <h1>第七章：從 Linux kernel 當中學習活用 SOLID 原則</h1>
+            <h2>引言：為何選擇 Linux 核心？</h2>
+            <p>本章的目標，並非在核心中尋找完美符合 SOLID 的範例，恰恰相反，我們要透過它來學習軟體設計的終極智慧——<strong>權衡 (Trade-off)</strong>。</p>
+            <h2>案例研究：在核心原始碼中看見 SOLID 的身影與權衡</h2>
+            <h3>SRP 的權衡 Part 1：資料結構的凝聚力 - <code>struct inode</code></h3>
+            <h4>權衡：</h4>
+            <p>這是典型的為了<strong>性能</strong>而做的取捨。將檔案的元數據和其對應的記憶體快取資訊緊密地打包在同一個結構中，可以最大化 CPU 的快取局部性 (cache locality)。<strong>犧牲 SRP 的純粹性，換取了系統 I/O 的核心性能。</strong></p>
+            <h3>OCP 的挑戰：安全性與相容性的枷鎖 - 系統呼叫 (syscall)</h3>
+            <h4>權衡：</h4>
+            <p>這種「封閉」是一種保護。然而，核心透過提供像 <code>ioctl</code> 這種「多工轉發」的通用系統呼叫，巧妙地實現了另一種層次的 OCP。<strong>這是一種有管理的、分層的開放策略，用核心 API 的極度穩定性，換取了整個生態的健壯性。</strong></p>
+            <h3>LSP 的生命線：<code>cdev</code> 與其行為契約</h3>
+            <h4>分析：</h4>
+            <p>在這裡，LSP 幾乎沒有妥協的空間。<strong>在核心與使用者空間的邊界上，LSP 所保證的行為一致性是維繫系統穩定的生命線。</strong></p>
+            <div class="chapter-summary">
+                <h2>本章總結：從 Linux 核心學到的設計智慧</h2>
+                <ol>
+                    <li><strong>辨識變化軸線：</strong> 辨識出系統中最可能變化、最需要靈活性的部分。</li>
+                    <li><strong>緊扣關鍵指標：</strong> 在性能瓶頸處，性能指標的優先級高於設計原則的純粹性。</li>
+                    <li><strong>權衡開放模式：</strong> 理解「開放」有不同的層次和代價。</li>
+                    <li><strong>尊重行為契約：</strong> 在跨越模組或系統邊界時，行為的一致性（LSP）是不可動搖的鐵律。</li>
+                    <li><strong>理解抽象的成本：</strong> 所有的設計原則和模式都有其成本。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Page: Chapter 8 -->
+        <div id="ch8" class="page">
+            <h1>第八章：思考及程式練習題</h1>
+            <h4>引言：從知道到做到的橋樑</h4>
+            <p>歡迎來到這份文件的最後一章。理論的學習是地基，而實踐則是建造高樓的過程。本章提供了一系列綜合性的挑戰，旨在幫助您將前述所有 SOLID 原則融會貫通，應用於解決更貼近真實世界的複雜問題。</p>
+            <p>強烈建議您在閱讀每個問題後，先停下來，嘗試自己思考或動手解決，形成自己的答案，然後再與後面的解答與思路進行比對。這個主動思考的過程，遠比直接看答案更有價值。</p>
+            <hr>
+            <h2>第一部分：設計思考題</h2>
+            <h3>問題 1 (SRP & ISP): 線上課程平台的模組設計</h3>
+            <h4>情境：</h4>
+            <p>您正在設計一個線上課程平台的「課程」核心模組。圍繞著「課程」這個實體，有三種不同的角色（Actor）：</p>
+            <ol>
+                <li><strong>學生 (Student):</strong> 可以「觀看」課程影片、「查詢」課程介紹、「發表」評論。</li>
+                <li><strong>老師 (Teacher):</strong> 可以「上傳」新的課程影片、「修改」課程介紹、「查看」學生的評論。</li>
+                <li><strong>營運人員 (Operator):</strong> 需要「查詢」課程的總報名人數和累計銷售額，以製作財務報表。</li>
+            </ol>
+            <h4>挑戰：</h4>
+            <p>如果將所有功能都塞進一個巨大的 <code>Course</code> 類別，它將很快變得難以維護。您會如何設計相關的類別與介面，來滿足不同角色的需求，並同時遵循單一職責原則 (SRP) 和介面隔離原則 (ISP)？請描述您會建立哪些類別/介面，以及它們各自的職責。</p>
+            
+            <h3>問題 2 (OCP & LSP): 折扣計算引擎的擴充</h3>
+            <h4>情境：</h4>
+            <p>您正在為一個電商網站設計一個折扣計算引擎。目前支援兩種折扣策略：</p>
+            <ol>
+                <li><strong>百分比折扣</strong> (例如，商品打九折)。</li>
+                <li><strong>固定金額折抵</strong> (例如，訂單總額減 100 元)。</li>
+            </ol>
+            <p>現在，產品經理提出了新的需求，未來需要能輕易地增加新的折扣方式，例如：</p>
+            <ul>
+                <li><strong>滿額贈品</strong> (訂單滿 2000 元，贈送一個特定商品)。</li>
+                <li><strong>紅利點數折抵</strong> (使用會員的紅利點數，每 10 點折抵 1 元)。</li>
+            </ul>
+            <h4>挑戰：</h4>
+            <ol>
+                <li>請設計一個符合開放封閉原則 (OCP) 的架構，讓未來新增任何折扣策略時，都無需修改既有的核心計算邏輯。</li>
+                <li>假設「紅利點數折抵」策略有一個特殊規則：「如果用戶點數不足，則此折扣不生效，且<strong>不能</strong>拋出異常，必須讓後續的其他折扣能繼續計算」。這個規則對您的設計有什麼影響？您需要如何設計以確保它不違反里氏替換原則 (LSP)？</li>
+            </ol>
+
+            <h3>問題 3 (DIP & Testability): 使用者註冊服務的重構</h3>
+            <h4>情境：</h4>
+            <p>您看到一段既有的使用者註冊服務程式碼，其邏輯大致如下：</p>
+            <pre><code><span class="code-keyword">class</span> <span class="code-class">RegistrationService</span>:
+    <span class="code-keyword">def</span> <span class="code-function">register_user</span>(<span class="code-keyword">self</span>, username, password, phone_number):
+        <span class="code-comment"># 1. 檢查使用者名稱是否已存在 (省略)</span>
+        <span class="code-comment"># 2. 發送驗證碼 (錯誤：直接依賴了具體的簡訊 API 客戶端)</span>
+        verification_code = SmsApiClient.<span class="code-function">generate_code</span>()
+        <span class="code-keyword">try</span>:
+            SmsApiClient.<span class="code-function">send_code</span>(phone_number, verification_code)
+        <span class="code-keyword">except</span> ConnectionError:
+            <span class="code-function">print</span>(<span class="code-string">"驗證碼發送失敗，註冊終止。"</span>)
+            <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+        <span class="code-comment"># 3. 建立使用者帳號 (省略)</span>
+        <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+</code></pre>
+            <h4>挑戰：</h4>
+            <ol>
+                <li>這個設計在<strong>單元測試</strong>上有什麼困難？特別是，您如何能輕易地測試「當驗證碼發送失敗時，註冊流程應終止」這個重要的邏輯分支？</li>
+                <li>請描述您將如何使用依賴反轉原則 (DIP) 來重構此服務。</li>
+                <li>重構後，請描述您的單元測試將如何撰寫，來說明測試性得到了提升。</li>
+            </ol>
+
+            <h3>問題 4 (ISP & DIP): 設計一個多功能硬體加速卡驅動介面</h3>
+            <h4>情境：</h4>
+            <p>您正在為一款新型的「加密加速卡」撰寫 Linux 驅動程式。這款硬體卡提供兩種截然不同的功能：</p>
+            <ol>
+                <li><strong>大量資料加解密:</strong> 透過一個 DMA 通道，可以高效地對大塊記憶體進行 AES 加密或解密。這是一個需要設定金鑰、模式等參數的複雜操作。</li>
+                <li><strong>硬體亂數生成:</strong> 卡上內建了一個高品質的硬體亂數產生器 (TRNG)，可以作為 <code>/dev/hwrng</code> 來使用。這是一個相對簡單的唯讀操作。</li>
+            </ol>
+            <h4>挑戰：</h4>
+            <p>如果將這兩種功能都透過同一個字元設備 <code>/dev/crypto_card</code> 和一套複雜的 <code>ioctl</code> 命令來暴露給使用者空間，那麼任何只想使用其中一個功能的應用程式，都必須理解整個複雜的介面，這顯然不理想。</p>
+            <p>請應用介面隔離原則 (ISP) 和依賴反轉原則 (DIP) 的思想，設計一個更清晰、更解耦合的架構。你可能會建立幾個字元設備？你會如何定義它們各自的 <code>file_operations</code> 結構？這個驅動的內部模組又該如何劃分？</p>
+            <hr>
+            <h2>第二部分：程式重構題</h2>
+            <h3>練習 1：重構「上帝物件」 (Refactoring a "God Object")</h3>
+            <h4>提供程式碼：</h4>
+            <pre><code><span class="code-keyword">import</span> sqlite3
+
+<span class="code-keyword">class</span> <span class="code-class">ReportGenerator</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, db_path: <span class="code-type">str</span>):
+        <span class="code-keyword">self</span>.db_path = db_path
+        <span class="code-keyword">self</span>.conn = <span class="code-keyword">None</span>
+
+    <span class="code-keyword">def</span> <span class="code-function">generate_sales_report</span>(<span class="code-keyword">self</span>, start_date, end_date):
+        <span class="code-comment"># 職責一：資料庫操作</span>
+        <span class="code-keyword">self</span>.conn = sqlite3.<span class="code-function">connect</span>(<span class="code-keyword">self</span>.db_path)
+        cursor = <span class="code-keyword">self</span>.conn.<span class="code-function">cursor</span>()
+        query = <span class="code-string">"SELECT product, SUM(amount) FROM sales WHERE date BETWEEN ? AND ? GROUP BY product"</span>
+        sales_data = cursor.<span class="code-function">execute</span>(query, (start_date, end_date)).<span class="code-function">fetchall</span>()
+        <span class="code-keyword">self</span>.conn.<span class="code-function">close</span>()
+        
+        <span class="code-comment"># 職責二：業務邏輯計算</span>
+        total_sales = <span class="code-function">sum</span>(row[1] <span class="code-keyword">for</span> row <span class="code-keyword">in</span> sales_data)
+        
+        <span class="code-comment"># 職責三：格式化輸出 (HTML)</span>
+        html = <span class="code-string">"&lt;html&gt;&lt;body&gt;&lt;h1&gt;Sales Report&lt;/h1&gt;"</span>
+        html += <span class="code-string">f"&lt;h2&gt;Total Sales: ${total_sales}&lt;/h2&gt;"</span>
+        html += <span class="code-string">"&lt;table border='1'&gt;&lt;tr&gt;&lt;th&gt;Product&lt;/th&gt;&lt;th&gt;Amount&lt;/th&gt;&lt;/tr&gt;"</span>
+        <span class="code-keyword">for</span> row <span class="code-keyword">in</span> sales_data:
+            html += <span class="code-string">f"&lt;tr&gt;&lt;td&gt;{row[0]}&lt;/td&gt;&lt;td&gt;${row[1]}&lt;/td&gt;&lt;/tr&gt;"</span>
+        html += <span class="code-string">"&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;"</span>
+
+        <span class="code-comment"># 職責四：檔案寫入</span>
+        <span class="code-keyword">with</span> <span class="code-function">open</span>(<span class="code-string">"sales_report.html"</span>, <span class="code-string">"w"</span>) <span class="code-keyword">as</span> f:
+            f.<span class="code-function">write</span>(html)
+        <span class="code-function">print</span>(<span class="code-string">"報告已生成: sales_report.html"</span>)
+</code></pre>
+            <h4>任務：</h4>
+            <p>請遵循 SOLID 原則（特別是 SRP 和 DIP），將這個巨大的類別重構為多個職責單一、低耦合的類別。</p>
+
+            <h3>練習 2：打造插件系統 (Building a Plugin System)</h3>
+            <h4>情境：</h4>
+            <p>您需要開發一個簡單的文字檔處理工具。它的核心功能是讀取一個文字檔的內容。您希望讓這個工具變得可擴展，讓其他開發者可以輕鬆地為它撰寫新的「分析」功能插件。</p>
+            <h4>任務：</h4>
+            <p>請使用 Python 設計一個符合 OCP 和 DIP 的插件系統。</p>
+            <ol>
+                <li>設計一個抽象的 <code>ITextPlugin</code> 介面。它應該有一個 <code>analyze(text: str) -> str</code> 方法。</li>
+                <li>建立一個主程式 <code>TextAnalyzer</code>，它可以註冊多個插件。</li>
+                <li>實作至少兩個具體的插件，例如 <code>WordCountPlugin</code> 和 <code>LineCountPlugin</code>。</li>
+                <li>您的設計必須能達到：當未來要新增第三個插件時，<strong>完全不需要修改 <code>TextAnalyzer</code> 的任何程式碼</strong>。</li>
+            </ol>
+
+            <h3>練習 3：重構混雜的硬體狀態輪詢函式</h3>
+            <h4>提供程式碼：</h4>
+            <pre><code><span class="code-preprocessor">#include &lt;stdio.h&gt;</span>
+<span class="code-preprocessor">#include &lt;stdint.h&gt;</span>
+
+<span class="code-keyword">typedef</span> <span class="code-keyword">struct</span> { <span class="code-type">uint32_t</span> status_reg; } <span class="code-type">device_t</span>;
+<span class="code-preprocessor">#define DATA_READY (1 &lt;&lt; 0)</span>
+<span class="code-preprocessor">#define ERROR_FLAG (1 &lt;&lt; 1)</span>
+<span class="code-preprocessor">#define TEMP_WARN  (1 &lt;&lt; 2)</span>
+
+<span class="code-keyword">void</span> <span class="code-function">process_incoming_data</span>(<span class="code-type">device_t</span>* dev) { <span class="code-function">printf</span>(<span class="code-string">"處理資料...\n"</span>); }
+<span class="code-keyword">void</span> <span class="code-function">log_error_and_reset</span>(<span class="code-type">device_t</span>* dev) { <span class="code-function">printf</span>(<span class="code-string">"紀錄錯誤並重設設備...\n"</span>); }
+<span class="code-keyword">void</span> <span class="code-function">adjust_fan_speed</span>(<span class="code-type">device_t</span>* dev) { <span class="code-function">printf</span>(<span class="code-string">"調整風扇速度...\n"</span>); }
+
+<span class="code-keyword">void</span> <span class="code-function">poll_device_status</span>(<span class="code-type">device_t</span>* dev) {
+    <span class="code-type">uint32_t</span> status = dev->status_reg;
+    <span class="code-keyword">if</span> (status & DATA_READY) { <span class="code-function">process_incoming_data</span>(dev); }
+    <span class="code-keyword">if</span> (status & ERROR_FLAG) { <span class="code-function">log_error_and_reset</span>(dev); }
+    <span class="code-keyword">if</span> (status & TEMP_WARN) { <span class="code-function">adjust_fan_speed</span>(dev); }
+}
+</code></pre>
+            <h4>任務：</h4>
+            <p><code>poll_device_status</code> 函式違反了 SRP 和 OCP。請對其進行重構，目標是：</p>
+            <ol>
+                <li>讓每個狀態的處理邏輯分離 (SRP)。</li>
+                <li>設計一個可擴充的結構，讓未來新增狀態處理時，無需修改核心的輪詢迴圈 (OCP & DIP)。</li>
+            </ol>
+
+            <hr>
+            <h2>第三部分：解答與思路提示</h2>
+            <p><em>（注意：請在自己完成挑戰後再參考此部分）</em></p>
+            <details>
+                <summary>點此展開解答與分析</summary>
+                <div class="solution-content">
+                    <h4>思考題 1 解答 (SRP & ISP)</h4>
+                    <p><strong>思路提示：</strong> 從「角色」出發，思考每個角色關心的「職責」是什麼，然後為這些職責建立專屬的服務與介面。</p>
+                    <p><strong>解答與分析：</strong></p>
+                    <ol>
+                        <li><strong>SRP 應用：</strong>
+                            <ul>
+                                <li><code>CourseContentService</code>: 負責課程內容管理。</li>
+                                <li><code>CourseInteractionService</code>: 負責課程互動功能。</li>
+                                <li><code>CourseAnalyticsService</code>: 負責課程數據分析。</li>
+                            </ul>
+                        </li>
+                        <li><strong>ISP 應用：</strong>
+                            <ul>
+                                <li><code>IStudentCourseView</code> (for Student): 介面只包含學生需要的功能。</li>
+                                <li><code>ITeacherCourseAdmin</code> (for Teacher): 介面包含老師需要的功能。</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <h4>思考題 2 解答 (OCP & LSP)</h4>
+                    <p><strong>思路提示：</strong> 看到 <code>if/elif</code> 處理不同「類型」的邏輯，就要想到使用「策略模式」來實現 OCP。思考 LSP 時，要關注子類別的行為是否會讓客戶端「驚訝」。</p>
+                    <p><strong>解答與分析：</strong></p>
+                    <ol>
+                        <li><strong>OCP 設計：</strong>
+                            <ul>
+                                <li>定義一個抽象的 <code>IDiscountStrategy</code> 介面，其中有一個 <code>apply(order)</code> 方法。</li>
+                                <li>建立 <code>PercentageDiscount</code>, <code>FixedAmountDiscount</code> 等具體的策略類別。</li>
+                                <li>折扣計算引擎的核心邏輯，是接收一個 <code>IDiscountStrategy</code> 的列表，然後依序呼叫它們的 <code>apply</code> 方法。</li>
+                            </ul>
+                        </li>
+                        <li><strong>LSP 考量：</strong>
+                            <ul>
+                                <li>「紅利點數不足時不生效且不拋異常」的規則，是在定義 <code>PointsDiscount</code> 的<strong>後置條件</strong>。</li>
+                                <li>為了不違反 LSP，<code>IDiscountStrategy</code> 的 <code>apply</code> 方法契約必須足夠通用。例如，可以定義其回傳一個 <code>DiscountResult</code> 物件，該物件包含「折扣是否成功應用」及「折扣金額」。<code>PointsDiscount</code> 在點數不足時，可以回傳一個「折扣未成功應用」的結果。這樣，客戶端可以根據回傳結果來決定後續行為，而不會因為某個子類別的特殊行為（如拋出預期之外的異常）而崩潰。</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <h4>思考題 3 解答 (DIP & Testability)</h4>
+                    <p><strong>思路提示：</strong> 只要看到 <code>new</code> 一個具體類別，或呼叫一個靜態方法，就要警覺 DIP 被違反。解法是引入抽象，並透過外部注入。</p>
+                    <p><strong>解答與分析：</strong></p>
+                    <ol>
+                        <li><strong>測試困難點：</strong> 要測試「發送失敗」的分支，必須透過複雜的方式來讓 <code>SmsApiClient.send_code</code> 真正地拋出 <code>ConnectionError</code>，這非常困難且不穩定。</li>
+                        <li><strong>DIP 重構：</strong>
+                            <ul>
+                                <li>定義一個 <code>ISmsProvider</code> 介面，有 <code>send_code(phone, code)</code> 方法。</li>
+                                <li>建立一個 <code>ConcreteSmsProvider(ISmsProvider)</code>，其內部去呼叫真正的 <code>SmsApiClient</code>。</li>
+                                <li>修改 <code>RegistrationService</code>，讓它在建構函式中接收一個 <code>ISmsProvider</code> 的實例。</li>
+                            </ul>
+                        </li>
+                        <li><strong>提升後的單元測試：</strong> 在測試程式碼中，我們可以建立一個「測試用的假物件」(Mock/Fake Object)，讓它在被呼叫時必定拋出 <code>ConnectionError</code>，從而可以簡單、快速、可靠地測試失敗路徑。</li>
+                    </ol>
+                    <h4>思考題 4 解答 (ISP & DIP)</h4>
+                    <p><strong>思路提示：</strong> ISP 的核心是為客戶端建立專屬介面。這裡的「客戶端」是不同類型的應用程式。DIP 則要求我們將「設備操作」與「硬體控制」分離。</p>
+                    <p><strong>解答與分析：</strong></p>
+                    <ol>
+                        <li><strong>ISP 應用 - 拆分設備節點：</strong>
+                            <ul>
+                                <li>建立兩個字元設備節點：<code>/dev/crypto_bulk</code>（用於加解密，實現 <code>read</code>, <code>write</code>, <code>ioctl</code>）和 <code>/dev/hwrng</code>（用於取亂數，只實現 <code>read</code>）。這樣，只想獲取亂數的應用程式，完全不需要知道任何關於 AES 加密的複雜 <code>ioctl</code> 命令的存在。</li>
+                            </ul>
+                        </li>
+                        <li><strong>DIP 應用 - 驅動內部分層：</strong>
+                            <ul>
+                                <li><strong>核心模組 (<code>crypto_accel_core.c</code>):</strong> 低階模組，負責與硬體 I/O 互動，並提供一組抽象的函式（如 <code>core_bulk_encrypt</code>, <code>core_get_random_bytes</code>）給上層使用。</li>
+                                <li><strong>介面模組 (<code>crypto_bulk_dev.c</code>, <code>hwrng_dev.c</code>):</strong> 高階模組，負責實現 <code>file_operations</code> 並與 VFS 互動。它們透過呼叫核心模組提供的抽象函式來完成工作，從而將「與 VFS 溝通的介面邏輯」和「與硬體溝通的底層邏輯」分離。</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <h4>程式練習題 1 解答 (Refactoring a "God Object")</h4>
+                    <p><strong>思路提示：</strong> 逐一識別出不同職責：資料庫存取、業務計算、格式化、檔案寫入。為每個職責建立一個專門的類別和抽象介面。</p>
+                    <p><strong>解答與分析 (程式碼骨架):</strong></p>
+                    <pre><code><span class="code-comment"># 1. 定義抽象介面 (DIP)</span>
+<span class="code-keyword">class</span> <span class="code-class">ISalesRepository</span>: ...
+<span class="code-keyword">class</span> <span class="code-class">IReportFormatter</span>: ...
+<span class="code-keyword">class</span> <span class="code-class">IReportWriter</span>: ...
+
+<span class="code-comment"># 2. 建立具體實現 (SRP)</span>
+<span class="code-keyword">class</span> <span class="code-class">SqliteSalesRepository</span>(<span class="code-class">ISalesRepository</span>): ...
+<span class="code-keyword">class</span> <span class="code-class">HtmlReportFormatter</span>(<span class="code-class">IReportFormatter</span>): ...
+<span class="code-keyword">class</span> <span class="code-class">LocalFileWriter</span>(<span class="code-class">IReportWriter</span>): ...
+    
+<span class="code-comment"># 3. 核心業務邏輯類別 (高階模組)</span>
+<span class="code-keyword">class</span> <span class="code-class">SalesReporter</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, repo, formatter, writer): ...
+</code></pre>
+
+                    <h4>程式練習題 2 解答 (Building a Plugin System)</h4>
+                    <p><strong>思路提示：</strong> 核心 <code>TextAnalyzer</code> 應該依賴 <code>ITextPlugin</code> 介面的「列表」，而不是任何具體的插件。插件的實例化和註冊應該在外部的「組裝區」完成。</p>
+                    <p><strong>解答與分析 (程式碼骨架):</strong></p>
+                    <pre><code><span class="code-comment"># 1. 抽象介面</span>
+<span class="code-keyword">class</span> <span class="code-class">ITextPlugin</span>(ABC): ...
+
+<span class="code-comment"># 2. 主程式 (對修改封閉)</span>
+<span class="code-keyword">class</span> <span class="code-class">TextAnalyzer</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>): <span class="code-keyword">self</span>._plugins = []
+    <span class="code-keyword">def</span> <span class="code-function">register_plugin</span>(<span class="code-keyword">self</span>, plugin: <span class="code-class">ITextPlugin</span>): ...
+    <span class="code-keyword">def</span> <span class="code-function">analyze_file</span>(<span class="code-keyword">self</span>, filepath: <span class="code-type">str</span>): ...
+
+<span class="code-comment"># 3. 具體插件 (對擴展開放)</span>
+<span class="code-keyword">class</span> <span class="code-class">WordCountPlugin</span>(<span class="code-class">ITextPlugin</span>): ...
+<span class="code-keyword">class</span> <span class="code-class">LineCountPlugin</span>(<span class="code-class">ITextPlugin</span>): ...
+
+<span class="code-comment"># 4. 組裝區</span>
+analyzer = <span class="code-function">TextAnalyzer</span>()
+analyzer.<span class="code-function">register_plugin</span>(<span class="code-function">WordCountPlugin</span>())
+analyzer.<span class="code-function">register_plugin</span>(<span class="code-function">LineCountPlugin</span>())
+analyzer.<span class="code-function">analyze_file</span>(...)
+</code></pre>
+
+                    <h4>程式練習題 3 解答 (Refactoring a Polling Function)</h4>
+                    <p><strong>思路提示：</strong> 這是 C 語言中應用 OCP/DIP 的經典場景。關鍵是定義一個抽象的「處理器」契約（通常用函式指標結構），然後用一個處理器陣列來構成一個可擴展的系統。</p>
+                    <p><strong>解答與分析 (重構後的程式碼):</strong></p>
+                    <pre><code><span class="code-comment">// 1. 定義抽象契約 (DIP)</span>
+<span class="code-keyword">typedef</span> <span class="code-keyword">struct</span> {
+    <span class="code-keyword">const</span> <span class="code-type">uint32_t</span> status_mask;
+    <span class="code-keyword">void</span> (*handler_func)(<span class="code-type">device_t</span>* dev);
+} <span class="code-type">status_handler_t</span>;
+
+<span class="code-comment">// 2. 建立一個可擴充的處理器列表 (OCP 的核心)</span>
+<span class="code-keyword">static</span> <span class="code-keyword">const</span> <span class="code-type">status_handler_t</span> status_handlers[] = {
+    { .status_mask = DATA_READY, .handler_func = process_incoming_data },
+    { .status_mask = ERROR_FLAG, .handler_func = log_error_and_reset },
+    { .status_mask = TEMP_WARN,  .handler_func = adjust_fan_speed },
+};
+
+<span class="code-comment">// 3. 重構後的核心輪詢函式 (對修改封閉)</span>
+<span class="code-keyword">void</span> <span class="code-function">poll_device_status_refactored</span>(<span class="code-type">device_t</span>* dev) {
+    <span class="code-type">uint32_t</span> status = dev->status_reg;
+    <span class="code-keyword">int</span> num_handlers = <span class="code-keyword">sizeof</span>(status_handlers) / <span class="code-keyword">sizeof</span>(status_handlers[0]);
+    <span class="code-keyword">for</span> (<span class="code-keyword">int</span> i = 0; i < num_handlers; ++i) {
+        <span class="code-keyword">if</span> (status & status_handlers[i].status_mask) {
+            status_handlers[i].handler_func(dev);
+        }
+    }
+}
+</code></pre>
+                </div>
+            </details>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+
+            function showPage(hash) {
+                const targetHash = hash || '#home';
+                
+                pages.forEach(page => page.classList.remove('active'));
+                const targetPage = document.querySelector(targetHash);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                } else {
+                    document.querySelector('#home').classList.add('active'); // Fallback
+                }
+
+                links.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === targetHash) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                }
+                // Scroll to top of content area on page change
+                document.querySelector('.main-content').scrollTop = 0;
+            }
+
+            // Initial page load
+            showPage(window.location.hash);
+
+            // Handle navigation clicks
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetHash = this.getAttribute('href');
+                    if (window.location.hash !== targetHash) {
+                        history.pushState(null, null, targetHash);
+                    }
+                    showPage(targetHash);
+                });
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', () => showPage(window.location.hash));
+
+            // Handle mobile menu toggle
+            menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+            
+            // Add copy button functionality to all pre tags
+            document.querySelectorAll('pre').forEach(pre => {
+                const code = pre.querySelector('code');
+                if (code) {
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = '複製';
+                    copyButton.className = 'copy-btn';
+                    
+                    copyButton.addEventListener('click', () => {
+                        // Use a temporary textarea for broader compatibility
+                        const textArea = document.createElement('textarea');
+                        textArea.value = code.innerText;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            copyButton.textContent = '已複製!';
+                        } catch (err) {
+                            console.error('Fallback: Oops, unable to copy', err);
+                            copyButton.textContent = '失敗';
+                        }
+                        document.body.removeChild(textArea);
+
+                        setTimeout(() => {
+                            copyButton.textContent = '複製';
+                        }, 2000);
+                    });
+                    
+                    pre.appendChild(copyButton);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
