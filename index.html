@@ -179,6 +179,22 @@
         .solution-content { padding: 5px 25px 15px 25px; }
         .solution-content h4 { font-size: 1.4em; border-bottom: 1px solid #eee; padding-bottom: 8px; color: #0056b3; }
 
+        .back-to-home {
+            display: inline-block;
+            margin-top: 2em;
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .back-to-home:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
         /* Responsive Design */
         .menu-toggle { display: none; }
         @media (max-width: 768px) {
@@ -221,6 +237,7 @@
                 <li><a href="#ch6" class="nav-link">第六章: DIP</a></li>
                 <li><a href="#ch7" class="nav-link">第七章: Linux 案例</a></li>
                 <li><a href="#ch8" class="nav-link">第八章: 練習題</a></li>
+                <li><a href="#conclusion" class="nav-link">總結</a></li>
             </ul>
         </nav>
     </aside>
@@ -1006,6 +1023,40 @@ analyzer.<span class="code-function">analyze_file</span>(...)
                 </div>
             </details>
         </div>
+        
+        <!-- Page: Conclusion -->
+        <div id="conclusion" class="page">
+            <h1>總結：成為 AI 時代的軟體建築師</h1>
+            <p>我們一同走過了 SOLID 五大原則的理論、高階與底層的程式碼實踐，最後深入到 Linux 核心，去體會真實世界中的設計權衡。現在，是時候將這些點串連起來，形成一個完整的知識體系。</p>
+            
+            <h2>四大核心收穫</h2>
+            <p>如果您能從這份指南中帶走四個核心觀念，我希望是以下這幾點：</p>
+            <ol>
+                <li>
+                    <strong>SOLID 是一種思維模式，而非僵化規則。</strong>
+                    <p>它的最終目標是管理複雜性。當您面對一個設計決策時，應該問：「這個選擇是讓我的系統耦合度更低、內聚性更高，還是反之？」而不是問：「這是否 100% 符合某個原則的字面定義？」</p>
+                </li>
+                <li>
+                    <strong>抽象是我們對抗變化的核心武器。</strong>
+                    <p>OCP 的擴展、LSP 的契約、ISP 的隔離、DIP 的反轉，它們的實現都根植於「抽象」這個概念。學會辨識系統中的「變化軸線」，並為其建立穩定的抽象介面，是架構設計的關鍵技能。</p>
+                </li>
+                <li>
+                    <strong>情境（Context）為王，權衡是智慧的體現。</strong>
+                    <p>Linux 核心的案例告訴我們，沒有放諸四海皆準的「最佳設計」。在性能熱點路徑上，SRP 的純粹性可以為快取局部性讓路；在需要極致穩定的系統邊界，OCP 的開放性必須受到嚴格管制。理解您所處的情境（性能、安全、團隊能力），並做出明智的權衡，是區分資深工程師與初級工程師的標誌。</p>
+                </li>
+                <li>
+                    <strong>SOLID 是您與 AI 協作的藍圖與護欄。</strong>
+                    <p>在 AI 時代，我們的工作重心從「砌磚」轉向「設計藍圖」與「品質監工」。SOLID 為您提供了繪製高品質藍圖的詞彙與框架，也給了您一把衡量 AI 產出品質的標尺。掌握它，您才能真正駕馭 AI，而不是被 AI 的效率所迷惑，產出一堆短期可用但長期難以維護的「AI 義大利麵」。</p>
+                </li>
+            </ol>
+
+            <h2>結語</h2>
+            <p>成為一名軟體建築師的旅程是持續的學習與實踐。SOLID 原則為這趟旅程提供了一張極其寶貴的地圖。希望這份指南能成為您地圖上的羅盤，幫助您在複雜的軟體世界中，始終朝著打造優雅、健壯、可持續演進的系統這個方向前進。</p>
+            <p>現在，帶著這些知識，去重構一段舊程式碼，去設計一個新模組，去引導您的 AI 夥伴，開始您的建築師之旅吧！</p>
+            
+            <a href="#home" class="back-to-home nav-link">返回首頁</a>
+        </div>
+
 
     </main>
 
